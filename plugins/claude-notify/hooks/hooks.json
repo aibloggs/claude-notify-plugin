@@ -12,13 +12,14 @@
         ]
       }
     ],
-    "Notification": [
+    "PreToolUse": [
       {
+        "matcher": "AskUserQuestion",
         "hooks": [
           {
             "type": "command",
             "command": "bash",
-            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/notify-dispatch.sh", "needs"],
+            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/notify-dispatch.sh", "question"],
             "async": true
           }
         ]

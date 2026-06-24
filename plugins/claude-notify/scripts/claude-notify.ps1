@@ -19,13 +19,27 @@ try {
       foreach ($k in 'message','body','title') {
         if ($j.PSObject.Properties.Name -contains $k -and $j.$k) { $payloadMsg = [string]$j.$k; break }
       }
+      # AskUserQuestion (PreToolUse) carries the question(s) in tool_input.
+      if (-not $payloadMsg -and ($j.PSObject.Properties.Name -contains 'tool_input') -and $j.tool_input) {
+        try {
+          $qs = $j.tool_input.questions
+          if ($qs) {
+            $parts = @()
+            foreach ($q in $qs) { if ($q.question) { $parts += [string]$q.question } }
+            if ($parts.Count -gt 0) { $payloadMsg = ($parts -join '  |  ') }
+          }
+        } catch {}
+      }
     }
   }
 } catch {}
 
 if (-not $Message) { $Message = $payloadMsg }
-if ($Event -eq "needs") {
-  $Title = "Claude has a question / needs you"
+if ($Event -eq "question") {
+  $Title = "Claude is asking you a question"
+  if (-not $Message) { $Message = "Claude needs your answer" }
+} elseif ($Event -eq "needs") {
+  $Title = "Claude needs you"
   if (-not $Message) { $Message = "Waiting for your input" }
 } else {
   $Title = "Claude is done"
