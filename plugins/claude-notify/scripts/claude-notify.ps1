@@ -13,7 +13,8 @@ param(
 $payloadMsg = ""
 try {
   if ([Console]::IsInputRedirected) {
-    $raw = [Console]::In.ReadToEnd()
+    $rt = [Console]::In.ReadToEndAsync()
+    if ($rt.Wait(1500)) { $raw = $rt.Result } else { $raw = "" }
     if ($raw -and $raw.Trim()) {
       $j = $raw.Trim() | ConvertFrom-Json -ErrorAction Stop
       foreach ($k in 'message','body','title') {
@@ -86,8 +87,12 @@ $hwnd = Get-TargetHwnd
 
 try {
   Import-Module BurntToast -ErrorAction Stop
-  $text = @($Title, $Message)
-  if ($attrLine) { $text += $attrLine }
+  $texts = @()
+  $texts += New-BTText -Text $Title
+  $texts += New-BTText -Text $Message
+  if ($attrLine) { $texts += New-BTText -Text $attrLine }
+  $binding = New-BTBinding -Children $texts
+  $visual  = New-BTVisual -BindingGeneric $binding
   $audio = New-BTAudio -Source 'ms-winsoundevent:Notification.Default'
   # Unique id per toast => each one stacks in the Action Center and never
   # replaces a previous one (4 events -> 4 notifications).
@@ -98,11 +103,11 @@ try {
     $btn     = New-BTButton -Content 'Go to session' -Arguments $launch -ActivationType Protocol
     $action  = New-BTAction -Buttons $btn
     # Scenario Reminder keeps the toast on screen until the user dismisses it.
-    $content = New-BTContent -Text $text -Actions $action -Audio $audio -Scenario Reminder -Launch $launch -ActivationType Protocol
+    $content = New-BTContent -Visual $visual -Actions $action -Audio $audio -Scenario Reminder -Launch $launch -ActivationType Protocol
   } else {
     $btn     = New-BTButton -Content 'Dismiss' -Dismiss
     $action  = New-BTAction -Buttons $btn
-    $content = New-BTContent -Text $text -Actions $action -Audio $audio -Scenario Reminder
+    $content = New-BTContent -Visual $visual -Actions $action -Audio $audio -Scenario Reminder
   }
   Submit-BTNotification -Content $content -UniqueIdentifier $uid -ErrorAction Stop
 }

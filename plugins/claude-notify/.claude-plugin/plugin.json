@@ -1,7 +1,7 @@
 {
   "name": "claude-notify",
   "description": "Desktop toast + sound when Claude Code finishes a turn or needs your input; click the toast to jump to the session window. Windows + WSL2.",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "author": {
     "name": "aibloggs"
   },
