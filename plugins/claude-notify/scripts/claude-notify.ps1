@@ -75,16 +75,22 @@ try {
   $text = @($Title, $Message)
   if ($attrLine) { $text += $attrLine }
   $audio = New-BTAudio -Source 'ms-winsoundevent:Notification.Default'
+  # Unique id per toast => each one stacks in the Action Center and never
+  # replaces a previous one (4 events -> 4 notifications).
+  $uid = [guid]::NewGuid().ToString("N")
 
   if ($hwnd -ne 0) {
     $launch  = "claude-focus:$hwnd"
     $btn     = New-BTButton -Content 'Go to session' -Arguments $launch -ActivationType Protocol
     $action  = New-BTAction -Buttons $btn
-    $content = New-BTContent -Text $text -Actions $action -Audio $audio -Launch $launch -ActivationType Protocol
+    # Scenario Reminder keeps the toast on screen until the user dismisses it.
+    $content = New-BTContent -Text $text -Actions $action -Audio $audio -Scenario Reminder -Launch $launch -ActivationType Protocol
   } else {
-    $content = New-BTContent -Text $text -Audio $audio
+    $btn     = New-BTButton -Content 'Dismiss' -Dismiss
+    $action  = New-BTAction -Buttons $btn
+    $content = New-BTContent -Text $text -Actions $action -Audio $audio -Scenario Reminder
   }
-  Submit-BTNotification -Content $content -ErrorAction Stop
+  Submit-BTNotification -Content $content -UniqueIdentifier $uid -ErrorAction Stop
 }
 catch {
   try {
