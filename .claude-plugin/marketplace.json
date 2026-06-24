@@ -1,0 +1,15 @@
+{
+  "name": "claude-notify",
+  "owner": {
+    "name": "aibloggs"
+  },
+  "plugins": [
+    {
+      "name": "claude-notify",
+      "source": "./plugins/claude-notify",
+      "description": "Desktop toast + sound when Claude finishes or needs input; click the toast to focus the session. Windows + WSL2.",
+      "category": "notifications",
+      "keywords": ["notifications", "toast", "wsl", "windows", "hooks", "sound"]
+    }
+  ]
+}
